@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.inputs.dbServiceGreen.name }}
+spec:
+  type: {{ .Values.inputs.dbServiceGreen.type }}
+  selector:
+    app: postgres-green
+  ports:
+  - port: {{ .Values.inputs.dbServiceGreen.ports.port }}
+    targetPort: {{ .Values.inputs.dbServiceGreen.ports.targetPort }}

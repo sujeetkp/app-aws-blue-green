@@ -1,0 +1,147 @@
+# Default values for blog-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+inputs:
+
+  productionSlot: blue
+
+  blogDeployBlue:
+    name: blog-deploy-blue
+    labels:
+      app: blog-blue
+      slot: blue
+    replicaCount: 1
+    image: 428411933129.dkr.ecr.us-east-1.amazonaws.com/blog:2.0
+    limits:
+      memory: 250M
+      cpu: 0.5
+    ports:
+      containerPort: 5000
+    environment:
+      dbServer: stage-tech-aurora-postgres-db-blue.cluster-cusgefost8jn.us-east-1.rds.amazonaws.com
+      dbPort: 5432
+      dbUsername: postgres
+      dbName: postgres
+      emailUsername: sujeetkumpadhi@gmail.com
+      mailServer: smtp.gmail.com
+      mailPort: 587
+      mailUseTLS: "True"
+      sqlalchemyTrack: "True"
+      flaskApp: run.py
+      bucket: app-s3-images-blue
+    secret:
+      name: secretdata
+      dbPassKey: dbpassword
+      emailPassKey: emailpassword
+      secretKey: secretkey
+      aws_access_key_id: aws_access_key_id
+      aws_secret_access_key: aws_secret_access_key
+    hpa:
+      name: blog-hpa-blue
+      minReplicas: 1
+      maxReplicas: 2
+      averageCPUUtilization: 80
+      averageMemoryUtilization: 80
+      pod_metric_name: http_request_per_second
+      averageValue: 500m
+  blogDeployGreen:
+    name: blog-deploy-green
+    labels:
+      app: blog-green
+      slot: green
+    replicaCount: 1
+    image: 428411933129.dkr.ecr.us-east-1.amazonaws.com/blog:3.0
+    limits:
+      memory: 250M
+      cpu: 0.5
+    ports:
+      containerPort: 5000
+    environment:
+      dbServer: stage-tech-aurora-postgres-db-green.cluster-cusgefost8jn.us-east-1.rds.amazonaws.com
+      dbPort: 5432
+      dbUsername: postgres
+      dbName: postgres
+      emailUsername: sujeetkumpadhi@gmail.com
+      mailServer: smtp.gmail.com
+      mailPort: 587
+      mailUseTLS: "True"
+      sqlalchemyTrack: "True"
+      flaskApp: run.py
+      bucket: app-s3-images-green
+    secret:
+      name: secretdata
+      dbPassKey: dbpassword
+      emailPassKey: emailpassword
+      secretKey: secretkey
+      aws_access_key_id: aws_access_key_id
+      aws_secret_access_key: aws_secret_access_key
+    hpa:
+      name: blog-hpa-green
+      minReplicas: 1
+      maxReplicas: 2
+      averageCPUUtilization: 80
+      averageMemoryUtilization: 80
+      pod_metric_name: http_request_per_second
+      averageValue: 500m
+
+  blogServiceProd:
+    name: blog-service-prod
+    type: ClusterIP
+    labels:
+      svc: blog-endpoint-prod
+    ports:
+      port: 5000
+      targetPort: 5000
+      name: http
+  blogServiceStage:
+    name:  blog-service-stage
+    type: ClusterIP
+    labels:
+      svc: blog-endpoint-stage
+    ports:
+      port: 5000
+      targetPort: 5000
+      name: http
+
+  serviceMonitorProd:
+    name: sm-blog-app-prod
+    labels:
+      app: blog-app-prod
+      release: kube-prometheus-stack
+    endpoints:
+      interval: 15s
+      path: "/metrics"
+  serviceMonitorStage:
+    name: sm-blog-app-stage
+    labels:
+      app: blog-app-stage
+      release: kube-prometheus-stack
+    endpoints:
+      interval: 15s
+      path: "/metrics"
+
+  clusterIssuer:
+    name: letsencrypt-prod
+    email: sujeetkupadhi@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    secretName: letsencrypt-production-private-key
+  ingress:
+    name: ingress-service
+    secretName: blog-simplifydev-co
+    tls:
+      - host: prd.simplifydev.co
+        backends:
+          - pathType: Prefix
+            path: /
+            serviceName: blog-service-prod
+            servicePort: 5000
+      - host: stg.simplifydev.co
+        backends:
+          - pathType: Prefix
+            path: /
+            serviceName: blog-service-stage
+            servicePort: 5000
+    annotations:
+      ingressClass: nginx                      
+      sslRedirect: "True"  

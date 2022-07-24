@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.inputs.dbDeployBlue.name }}
+spec:
+  replicas: {{ .Values.inputs.dbDeployBlue.replicaCount }}
+  selector:
+    matchLabels:
+      app: postgres-blue
+  template:
+    metadata:
+      labels:
+        app: postgres-blue
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.inputs.dbDeployBlue.image }}
+        resources:
+          limits:
+            memory: {{ .Values.inputs.dbDeployBlue.limits.memory | quote }}
+            cpu: {{ .Values.inputs.dbDeployBlue.limits.cpu | quote }}
+        ports:
+        - containerPort: {{ .Values.inputs.dbDeployBlue.ports.containerPort }}
+        volumeMounts:
+          - name: {{ .Values.inputs.dbDeployBlue.volume.name }}
+            mountPath: {{ .Values.inputs.dbDeployBlue.volume.mountPath }}
+            subPath: {{ .Values.inputs.dbDeployBlue.volume.subPath }}
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secretdata
+                key: dbpassword
+      volumes:
+        - name: {{ .Values.inputs.dbDeployBlue.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.inputs.dbVolumeClaimBlue.name }}

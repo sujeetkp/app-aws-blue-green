@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.inputs.blogDeployBlue.name }}
+  labels:
+    {{- range $key, $value := .Values.inputs.blogDeployBlue.labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.inputs.blogDeployBlue.replicaCount }}
+  selector:
+    matchLabels:
+      slot: blue
+  template:
+    metadata:
+      labels:
+        {{- range $key, $value := .Values.inputs.blogDeployBlue.labels }}
+        {{ $key }}: {{ $value }}
+        {{- end }}
+    spec:
+      containers:
+      - name: blog
+        image: {{ .Values.inputs.blogDeployBlue.image }}
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: {{ .Values.inputs.blogDeployBlue.limits.memory | quote }}
+            cpu: {{ .Values.inputs.blogDeployBlue.limits.cpu | quote }}
+        ports:
+        - containerPort: {{ .Values.inputs.blogDeployBlue.ports.containerPort }}
+        env:
+          - name: DB_SERVER
+            value: {{ .Values.inputs.blogDeployBlue.environment.dbServer }}
+          - name: DB_PORT
+            value: {{ .Values.inputs.blogDeployBlue.environment.dbPort | quote }}
+          - name: DB_USERNAME
+            value: {{ .Values.inputs.blogDeployBlue.environment.dbUsername }}
+          - name: DATABASE_NAME
+            value: {{ .Values.inputs.blogDeployBlue.environment.dbName }}
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.inputs.blogDeployBlue.secret.name }}
+                key: {{ .Values.inputs.blogDeployBlue.secret.dbPassKey }}
+          - name: EMAIL_USER
+            value: {{ .Values.inputs.blogDeployBlue.environment.emailUsername }}
+          - name: EMAIL_PASS
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.inputs.blogDeployBlue.secret.name }}
+                key: {{ .Values.inputs.blogDeployBlue.secret.emailPassKey }}
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.inputs.blogDeployBlue.secret.name }}
+                key: {{ .Values.inputs.blogDeployBlue.secret.secretKey }}
+          - name: SQLALCHEMY_TRACK_MODIFICATIONS
+            value: {{ .Values.inputs.blogDeployBlue.environment.sqlalchemyTrack | quote }}
+          - name: MAIL_SERVER
+            value: {{ .Values.inputs.blogDeployBlue.environment.mailServer }}
+          - name: MAIL_PORT
+            value: {{ .Values.inputs.blogDeployBlue.environment.mailPort | quote }}
+          - name: MAIL_USE_TLS
+            value: {{ .Values.inputs.blogDeployBlue.environment.mailUseTLS | quote }}
+          - name: FLASK_APP
+            value: {{ .Values.inputs.blogDeployBlue.environment.flaskApp }}
+          - name: BUCKET
+            value: {{ .Values.inputs.blogDeployBlue.environment.bucket }}
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.inputs.blogDeployBlue.secret.name }}
+                key: {{ .Values.inputs.blogDeployBlue.secret.aws_access_key_id }}
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.inputs.blogDeployBlue.secret.name }}
+                key: {{ .Values.inputs.blogDeployBlue.secret.aws_secret_access_key }}
+
+                

@@ -1,0 +1,21 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.inputs.blogDeployBlue.hpa.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.inputs.blogDeployBlue.name }}
+  minReplicas: {{ .Values.inputs.blogDeployBlue.hpa.minReplicas }}
+  maxReplicas: {{ .Values.inputs.blogDeployBlue.hpa.maxReplicas }}
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: {{ .Values.inputs.blogDeployBlue.hpa.pod_metric_name }}
+      target:
+        # target 500 milli-requests per second,
+        # which is 1 request every two seconds
+        type: AverageValue
+        averageValue: {{ .Values.inputs.blogDeployBlue.hpa.averageValue }}

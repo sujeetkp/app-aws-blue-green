@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.inputs.dbVolumeClaimGreen.name }}
+spec:
+  resources:
+    requests:
+      storage: {{ .Values.inputs.dbVolumeClaimGreen.storage }}
+  volumeMode: {{ .Values.inputs.dbVolumeClaimGreen.volumeMode }}
+  accessModes:
+    {{- range .Values.inputs.dbVolumeClaimGreen.accessModes }}
+    - {{ . }}
+    {{- end }}

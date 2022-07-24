@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.inputs.blogServiceStage.name }}
+  labels: 
+    {{- range $key, $value := .Values.inputs.blogServiceStage.labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+spec:
+  type: {{ .Values.inputs.blogServiceStage.type }}
+  selector:
+    {{- if eq .Values.inputs.productionSlot "blue" }}
+    slot: green
+    {{- else }}
+    slot: blue
+    {{- end }}
+  ports:
+  - name: {{ .Values.inputs.blogServiceStage.ports.name }}
+    port: {{ .Values.inputs.blogServiceStage.ports.port }}
+    targetPort: {{ .Values.inputs.blogServiceStage.ports.targetPort }}

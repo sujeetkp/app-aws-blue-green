@@ -1,0 +1,31 @@
+prometheus:
+  url: http://kube-prometheus-stack-prometheus.default.svc
+  port: 9090
+
+logLevel: 10
+
+rules:
+# This one is important and will remove the default rules.
+  default: false
+  custom: 
+  - seriesQuery: 'http_request_total{namespace!="",pod!=""}'
+    resources:
+      overrides:
+        namespace:
+          resource: namespace
+        pod: 
+          resource: pod
+    name:
+      matches: "^(.*)_total"
+      as: "${1}_per_second"
+    metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)'
+  external:
+  - seriesQuery: '{__name__=~"^buildkite_queues_scheduled_jobs_count$"}'
+    resources:
+      overrides:
+        job: {resource: "namespace"}
+        queue: {resource: "pod"}
+    name:
+      matches: ""
+      as: "buildkite_queues_scheduled_jobs_count"
+    metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>}) by (<<.GroupBy>>)

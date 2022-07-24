@@ -1,0 +1,74 @@
+pipeline{
+    agent{
+        label 'linux'
+    }
+    environment{
+        ACTION="destroy"
+        TERRAFORM_VERSION="1.0.0"
+        CHDIR="manifests"
+        AWS_ACCESS_KEY_ID=credentials('aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY=credentials('aws_secret_access_key')
+        KUBECONFIG="./manifests/kubeconfig/kubeconfig"
+    }
+    options {
+        ansiColor('xterm')
+    }
+    stages{
+        stage('install'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                 sh '''
+                    chmod 700 ./scripts/install.sh
+                    ./scripts/install.sh
+                '''
+            }         
+        }
+        stage('test'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/test.sh
+                    ./scripts/test.sh
+                '''
+            }          
+        }
+        stage('deploy'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/deploy.sh
+                    ./scripts/deploy.sh
+                '''
+            }       
+        }
+        stage('postDeploy'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                 sh '''
+                    chmod 700 ./scripts/postDeploy.sh
+                    ./scripts/postDeploy.sh
+                '''
+            }         
+        }
+        stage('destroy'){
+            when { 
+                environment name: 'ACTION', value: 'destroy' 
+            }
+            steps{
+                 sh '''
+                    chmod 700 ./scripts/destroy.sh
+                    ./scripts/destroy.sh
+                '''
+            }           
+        }
+    }
+}
+

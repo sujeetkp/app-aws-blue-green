@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.inputs.dbDeployGreen.name }}
+spec:
+  replicas: {{ .Values.inputs.dbDeployGreen.replicaCount }}
+  selector:
+    matchLabels:
+      app: postgres-green
+  template:
+    metadata:
+      labels:
+        app: postgres-green
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.inputs.dbDeployGreen.image }}
+        resources:
+          limits:
+            memory: {{ .Values.inputs.dbDeployGreen.limits.memory | quote }}
+            cpu: {{ .Values.inputs.dbDeployGreen.limits.cpu | quote }}
+        ports:
+        - containerPort: {{ .Values.inputs.dbDeployGreen.ports.containerPort }}
+        volumeMounts:
+          - name: {{ .Values.inputs.dbDeployGreen.volume.name }}
+            mountPath: {{ .Values.inputs.dbDeployGreen.volume.mountPath }}
+            subPath: {{ .Values.inputs.dbDeployGreen.volume.subPath }}
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secretdata
+                key: dbpassword
+      volumes:
+        - name: {{ .Values.inputs.dbDeployGreen.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.inputs.dbVolumeClaimGreen.name }}

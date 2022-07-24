@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.inputs.blogServiceProd.name }}
+  labels: 
+    {{- range $key, $value := .Values.inputs.blogServiceProd.labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+spec:
+  type: {{ .Values.inputs.blogServiceProd.type }}
+  selector:
+    slot: {{ .Values.inputs.productionSlot }}
+  ports:
+  - name: {{ .Values.inputs.blogServiceProd.ports.name }}
+    port: {{ .Values.inputs.blogServiceProd.ports.port }}
+    targetPort: {{ .Values.inputs.blogServiceProd.ports.targetPort }}

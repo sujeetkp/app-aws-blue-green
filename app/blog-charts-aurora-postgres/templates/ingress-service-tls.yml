@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.inputs.ingress.name }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.inputs.ingress.annotations.ingressClass }}                              
+    cert-manager.io/cluster-issuer: {{ .Values.inputs.clusterIssuer.name | quote }}       
+    nginx.ingress.kubernetes.io/ssl-redirect: {{ .Values.inputs.ingress.annotations.sslRedirect | quote }}       
+
+spec:
+  tls:
+    - hosts:                                                
+        {{- range .Values.inputs.ingress.tls }}
+        - {{ .host }}
+        {{- end }}
+      secretName: {{ .Values.inputs.ingress.secretName }}                         
+      
+  rules:                                                    
+     {{- range .Values.inputs.ingress.tls }}
+     - host: {{ .host }}
+       http:
+         paths:
+           {{- range .backends }}
+            - pathType: {{ .pathType }}
+              path: {{ .path | quote }}
+              backend:
+                service:
+                  name: {{ .serviceName }}
+                  port: 
+                    number: {{ .servicePort }}   
+           {{- end }}
+     {{- end }}                       
