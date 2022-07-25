@@ -1,0 +1,192 @@
+pipeline{
+    agent{
+        label 'master'
+    }
+    environment{
+        
+        ACTION="deploy"
+        SRC_DIR="app/blog"
+
+        KUBERNETES_CLUSTER_NAME="stage-tech-eks-cluster"
+        HELM_RELEASE_NAME="blog-app"
+        HELM_RELEASE_DIR="blog-charts-aurora-postgres"
+        
+        SHA="${sh (returnStdout: true, script: 'git rev-parse --short=4 ${GIT_COMMIT}').trim()}"
+        ECR_CONTAINER_REGISTRY="428411933129.dkr.ecr.us-east-1.amazonaws.com"
+        
+        AWS_DEFAULT_REGION="us-east-1"
+        AWS_ACCESS_KEY_ID=credentials('aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY=credentials('aws_secret_access_key')
+    
+        APP_SECRET_KEY=credentials('app_secret_key')
+        EMAIL_PASSWORD=credentials('email_password')
+        DB_PASSWORD=credentials('db_password')
+
+    }
+    options {
+        ansiColor('xterm')
+    }
+    stages{
+        stage('install'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/install.sh
+                    ./scripts/install.sh
+                '''
+            }      
+        }
+        stage('build'){
+            when { 
+                allOf{
+                    environment name: 'ACTION', value: 'deploy' 
+                    expression {
+                        return hasChangesIn(env.SRC_DIR)
+                    }
+                }               
+            }
+            steps{
+                script{
+                    env.BLOG_UPDATED = 1
+                }
+                               
+                sh '''
+                    chmod 700 ./scripts/build.sh
+                    ./scripts/build.sh
+                '''
+            }    
+        }
+        stage('push'){
+            when { 
+                allOf{
+                    environment name: 'ACTION', value: 'deploy' 
+                    expression {
+                        return hasChangesIn(env.SRC_DIR)
+                    }
+                }               
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/push.sh
+                    ./scripts/push.sh
+                '''
+            }           
+        }
+        stage('test'){
+            when { 
+                allOf{
+                    environment name: 'ACTION', value: 'deploy' 
+                    expression {
+                        return hasChangesIn(env.SRC_DIR)
+                    }
+                }               
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/test.sh
+                    ./scripts/test.sh
+                '''
+            }        
+        }
+        stage('pre-deploy'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/pre-deploy.sh
+                    ./scripts/pre-deploy.sh
+                '''
+            }        
+        }
+        stage('deploy to prod'){
+            when { 
+                allOf{
+                    environment name: 'ACTION', value: 'deploy' 
+                    environment name: 'CHANGE_ID', value: '' 
+                }               
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/deploy-prod.sh
+                    ./scripts/deploy-prod.sh
+                '''
+            }        
+        }
+        stage('deploy to stage'){
+            when { 
+                allOf{
+                    environment name: 'ACTION', value: 'deploy' 
+                    expression { env.CHANGE_ID != null }
+                }               
+            }
+            steps{           
+                sh '''
+                    chmod 700 ./scripts/deploy-stage.sh
+                    ./scripts/deploy-stage.sh
+                '''
+            }        
+        }
+        stage('postDeploy'){
+            when { 
+                environment name: 'ACTION', value: 'deploy' 
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/post-deploy.sh
+                    ./scripts/post-deploy.sh
+                '''
+            }
+        }
+        stage('destroy'){
+            when { 
+                allOf{
+                    environment name: 'ACTION', value: 'destroy' 
+                    environment name: 'CHANGE_ID', value: '' 
+                }               
+            }
+            steps{
+                sh '''
+                    chmod 700 ./scripts/destroy.sh
+                    ./scripts/destroy.sh
+                '''
+            }
+        }
+    }
+}
+
+// Check if changes present made to module/directory
+def boolean hasChangesIn(String module) {
+    
+    // merge or commit to main branch for files in module
+    if (env.CHANGE_TARGET == null) {
+        return sh(
+            returnStatus: true,
+            script: "git diff --name-only HEAD HEAD~1 | grep ^${module}/"
+        ) == 0
+    }
+    
+    // Below steps are to identify if PR has changed the files in module
+    def MASTER = sh(
+        returnStdout: true,
+        script: "git rev-parse origin/${env.CHANGE_TARGET}"
+    ).trim()
+
+    // Gets commit hash of HEAD commit. Jenkins will try to merge master into
+    // HEAD before running checks. If this is a fast-forward merge, HEAD does
+    // not change. If it is not a fast-forward merge, a new commit becomes HEAD
+    // so we check for the non-master parent commit hash to get the original
+    // HEAD. Jenkins does not save this hash in an environment variable.
+    def HEAD = sh(
+        returnStdout: true,
+        script: "git show -s --no-abbrev-commit --pretty=format:%P%n%H%n HEAD | tr ' ' '\n' | grep -v ${MASTER} | head -n 1"
+    ).trim()
+
+    return sh(
+        returnStatus: true,
+        script: "git diff --name-only ${MASTER}...${HEAD} | grep ^${module}/"
+    ) == 0
+
+}

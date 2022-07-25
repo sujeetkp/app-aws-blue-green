@@ -4,7 +4,7 @@
 
 inputs:
 
-  productionSlot: green
+  productionSlot: blue
 
   blogDeployBlue:
     name: blog-deploy-blue
