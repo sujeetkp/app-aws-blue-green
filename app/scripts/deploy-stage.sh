@@ -42,11 +42,11 @@ then
     echo "Source code has been updated. Deploying new built Image to stage !!"
 
     # Helm Debug output
-    helm upgrade ${HELM_RELEASE_NAME} --debug --dry-run ${HELM_RELEASE_DIR}/ \
+    helm upgrade ${HELM_RELEASE_NAME} --debug --dry-run --reuse-values  ${HELM_RELEASE_DIR}/ \
     --set inputs.blogDeploy${STAGESLOT}.image=${ECR_CONTAINER_REGISTRY}/blog:${SHA}
    
     # Helm Deploy
-    helm upgrade ${HELM_RELEASE_NAME} --atomic --timeout 300s ${HELM_RELEASE_DIR}/ \
+    helm upgrade ${HELM_RELEASE_NAME} --atomic --timeout 300s --reuse-values ${HELM_RELEASE_DIR}/ \
     --set inputs.blogDeploy${STAGESLOT}.image=${ECR_CONTAINER_REGISTRY}/blog:${SHA}
 
 else
@@ -54,6 +54,6 @@ else
     echo "Upgrading stage release !!"
     # No Change in Source Code
     helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --debug --dry-run 
-    helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --atomic --timeout 300s
+    helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --atomic --timeout 300s 
 
 fi
