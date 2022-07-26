@@ -31,9 +31,9 @@ PRODSLOT=$(helm get values --all ${HELM_RELEASE_NAME} | grep "productionSlot" | 
 
 if [[ "$PRODSLOT" == "blue" ]]
 then
-    STAGESLOT="green"
+    STAGESLOT="Green"
 else
-    STAGESLOT="blue"
+    STAGESLOT="Blue"
 fi
 
 if [[ "$BLOG_UPDATED" -eq 1 ]]
