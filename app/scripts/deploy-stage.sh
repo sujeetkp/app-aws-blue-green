@@ -27,7 +27,7 @@ then
     exit 0
 fi
 
-PRODSLOT=$(helm get values --all ${HELM_RELEASE_NAME} | grep "productionSlot" | sed 's/productionSlot\://g')
+PRODSLOT=$(helm get values --all ${HELM_RELEASE_NAME} | grep "productionSlot" | sed -e 's/productionSlot\://g' -e 's/ //g')
 
 if [[ "$PRODSLOT" == "blue" ]]
 then
