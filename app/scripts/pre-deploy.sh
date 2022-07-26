@@ -3,8 +3,8 @@
 # Get Kubeconfig
 aws eks update-kubeconfig --name ${KUBERNETES_CLUSTER_NAME}
 
-# Delete secret
-# kubectl delete secret secretdata
+#Delete secret
+kubectl delete secret secretdata
 
 # Create required secrets
 kubectl create secret generic secretdata \
