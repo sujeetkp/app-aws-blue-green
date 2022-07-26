@@ -4,8 +4,9 @@ pipeline{
     }
     environment{
         ACTION="destroy"
-        TERRAFORM_VERSION="1.0.0"
-        CHDIR="manifests"
+        TERRAFORM_VERSION="1.2.2"
+        CHDIR="terraform-aws-eks-rds-deploy/manifests"
+        SCRIPT_PATH="terraform-aws-eks-rds-deploy/scripts"
         AWS_ACCESS_KEY_ID=credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY=credentials('aws_secret_access_key')
     }
@@ -19,8 +20,8 @@ pipeline{
             }
             steps{
                  sh '''
-                    chmod 700 ./scripts/install.sh
-                    ./scripts/install.sh
+                    chmod 700 ${SCRIPT_PATH}/install.sh
+                    ${SCRIPT_PATH}/install.sh
                 '''
             }         
         }
@@ -30,8 +31,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/test.sh
-                    ./scripts/test.sh
+                    chmod 700 ${SCRIPT_PATH}/test.sh
+                    ${SCRIPT_PATH}/test.sh
                 '''
             }          
         }
@@ -41,8 +42,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/deploy.sh
-                    ./scripts/deploy.sh
+                    chmod 700 ${SCRIPT_PATH}/deploy.sh
+                    ${SCRIPT_PATH}/deploy.sh
                 '''
             }       
         }
@@ -52,8 +53,8 @@ pipeline{
             }
             steps{
                  sh '''
-                    chmod 700 ./scripts/postDeploy.sh
-                    ./scripts/postDeploy.sh
+                    chmod 700 ${SCRIPT_PATH}/postDeploy.sh
+                    ${SCRIPT_PATH}/postDeploy.sh
                 '''
             }         
         }
@@ -63,8 +64,8 @@ pipeline{
             }
             steps{
                  sh '''
-                    chmod 700 ./scripts/destroy.sh
-                    ./scripts/destroy.sh
+                    chmod 700 ${SCRIPT_PATH}/destroy.sh
+                    ${SCRIPT_PATH}/destroy.sh
                 '''
             }           
         }
