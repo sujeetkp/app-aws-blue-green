@@ -9,7 +9,8 @@ pipeline{
 
         KUBERNETES_CLUSTER_NAME="stage-tech-eks-cluster"
         HELM_RELEASE_NAME="blog-app"
-        HELM_RELEASE_DIR="blog-charts-aurora-postgres"
+        HELM_RELEASE_DIR="app/blog-charts-aurora-postgres"
+        SCRIPT_PATH="app/scripts"
         
         SHA="${sh (returnStdout: true, script: 'git rev-parse --short=4 ${GIT_COMMIT}').trim()}"
         ECR_CONTAINER_REGISTRY="428411933129.dkr.ecr.us-east-1.amazonaws.com"
@@ -33,8 +34,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/install.sh
-                    ./scripts/install.sh
+                    chmod 700 ${SCRIPT_PATH}/install.sh
+                    ${SCRIPT_PATH}/install.sh
                 '''
             }      
         }
@@ -53,8 +54,8 @@ pipeline{
                 }
                                
                 sh '''
-                    chmod 700 ./scripts/build.sh
-                    ./scripts/build.sh
+                    chmod 700 ${SCRIPT_PATH}/build.sh
+                    ${SCRIPT_PATH}/build.sh
                 '''
             }    
         }
@@ -69,8 +70,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/push.sh
-                    ./scripts/push.sh
+                    chmod 700 ${SCRIPT_PATH}/push.sh
+                    ${SCRIPT_PATH}/push.sh
                 '''
             }           
         }
@@ -85,8 +86,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/test.sh
-                    ./scripts/test.sh
+                    chmod 700 ${SCRIPT_PATH}/test.sh
+                    ${SCRIPT_PATH}/test.sh
                 '''
             }        
         }
@@ -96,8 +97,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/pre-deploy.sh
-                    ./scripts/pre-deploy.sh
+                    chmod 700 ${SCRIPT_PATH}/pre-deploy.sh
+                    ${SCRIPT_PATH}/pre-deploy.sh
                 '''
             }        
         }
@@ -110,8 +111,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/deploy-prod.sh
-                    ./scripts/deploy-prod.sh
+                    chmod 700 ${SCRIPT_PATH}/deploy-prod.sh
+                    ${SCRIPT_PATH}/deploy-prod.sh
                 '''
             }        
         }
@@ -124,8 +125,8 @@ pipeline{
             }
             steps{           
                 sh '''
-                    chmod 700 ./scripts/deploy-stage.sh
-                    ./scripts/deploy-stage.sh
+                    chmod 700 ${SCRIPT_PATH}/deploy-stage.sh
+                    ${SCRIPT_PATH}/deploy-stage.sh
                 '''
             }        
         }
@@ -135,8 +136,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/post-deploy.sh
-                    ./scripts/post-deploy.sh
+                    chmod 700 ${SCRIPT_PATH}/post-deploy.sh
+                    ${SCRIPT_PATH}/post-deploy.sh
                 '''
             }
         }
@@ -149,8 +150,8 @@ pipeline{
             }
             steps{
                 sh '''
-                    chmod 700 ./scripts/destroy.sh
-                    ./scripts/destroy.sh
+                    chmod 700 ${SCRIPT_PATH}/destroy.sh
+                    ${SCRIPT_PATH}/destroy.sh
                 '''
             }
         }
