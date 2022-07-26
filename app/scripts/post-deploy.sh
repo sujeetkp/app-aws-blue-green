@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sleep 300
+#sleep 300
 
 echo 'Kubernetes Nodes ...'
 kubectl get nodes
