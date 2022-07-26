@@ -8,5 +8,5 @@ echo "GIT Commit: ${GIT_COMMIT}"
 echo "GIT SHA.: ${SHA}"
 
 # Build Image
-sudo docker build -t ${ECR_CONTAINER_REGISTRY}/blog:${SHA} ./blog
+sudo docker build -t ${ECR_CONTAINER_REGISTRY}/blog:${SHA} app/blog
 
