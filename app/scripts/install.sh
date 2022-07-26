@@ -4,6 +4,7 @@
 sudo yum install epel-release -y 
 sudo yum update -y
 sudo yum install -y jq
+sudo yum install -y unzip
 
 #######################################
 
