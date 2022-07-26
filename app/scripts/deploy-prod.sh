@@ -40,7 +40,7 @@ echo "Switching slot .."
 echo "New Slot: $NEWSLOT"
 
 # Switch Prod and Stage Slots
-echo "helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --atomic --timeout 300s --set inputs.productionSlot=${NEWSLOT}"
+echo "helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --atomic --timeout 300s --reuse-values --set inputs.productionSlot=${NEWSLOT}"
 
 helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --debug --dry-run --reuse-values --set inputs.productionSlot=${NEWSLOT} 
 helm upgrade ${HELM_RELEASE_NAME} ${HELM_RELEASE_DIR}/ --atomic --timeout 300s --reuse-values --set inputs.productionSlot=${NEWSLOT} 
